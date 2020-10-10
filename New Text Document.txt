@@ -1,0 +1,117 @@
+/*
+
+Suppose that you're working in a small town administration, and you're in charge of two town elements:
+1. Parks
+2. Streets
+
+It's a very small town, so right now there are only 3 parks and 4 streets. All parks and streets have a name and a build year.
+
+At an end-of-year meeting, your boss wants a final report with the following:
+1. Tree density of each park in the town (forumla: number of trees/park area)
+2. Average age of each town's park (forumla: sum of all ages/number of parks)
+3. The name of the park that has more than 1000 trees
+4. Total and average length of the town's streets
+5. Size classification of all streets: tiny/small/normal/big/huge. If the size is unknown, the default is normal
+
+All the report data should be printed to the console.
+
+HINT: Use some of the ES6 features: classes, subclasses, template strings, default parameters, maps, arrow functions, destructuring, etc.
+
+*/
+
+class Element {
+    constructor(name, buildYear) {
+        this.name = name;
+        this.buildYear = buildYear;
+    }
+}
+
+class Parks extends Element {
+    constructor(name, buildYear, treeNum, parkArea) {
+        super(name, buildYear);
+        this.treeNum = treeNum;
+        this.parkArea = parkArea;
+    }
+
+    treeDensity() {
+        let density = formattingNumber(Math.round(this.treeNum / this.parkArea));
+        console.log(`The Tree density of ${this.name} is ${density}`);
+    }
+}
+
+class Streets extends Element {
+    constructor(name, buildYear, length, size = 3) {
+        super(name, buildYear);
+        this.length = length;
+        this.size = size;
+    }
+
+    streetClassify() {
+        const classification = new Map();
+        classification.set(1, 'Tiny');
+        classification.set(2, 'small');
+        classification.set(3, 'normal');
+        classification.set(4, 'big');
+        classification.set(5, 'huge');
+        console.log(`${this.name} was built in ${this.buildYear} and it's length is ${formattingNumber(this.length)}km so this street is ${classification.get(this.size)} street`);
+    }
+}
+
+const parks = [new Parks('Green park', 1987, 215, 0.2), new Parks('National park', 1894, 3541, 2.90), new Parks('Oak park', 1953, 949, 0.40)];
+
+const streets = [new Streets('Ocean Avenue', 1999, 1.1, 4), new Streets('Every green street', 2008, 2.7, 2), new Streets('4th street', 2015, 0.8), new Streets('Sunset boulevard', 1982, 2.50, 5)];
+
+var formattingNumber = function (num) {
+    var numSplit, currNum, decNum;
+    num = Math.abs(num);
+    num = num.toFixed(2);
+
+    numSplit = num.split('.');
+
+    currNum = numSplit[0];
+    if (currNum.length > 3) {
+        currNum = currNum.substr(0, currNum.length - 3) + ',' + currNum.substr(currNum.length - 3, currNum.length);
+    }
+
+    decNum = numSplit[1];
+
+    return currNum + '.' + decNum;
+}
+
+
+var cal = function (arr) {
+    let sum = arr.reduce((acc, cur) => acc + cur);
+    return [formattingNumber(Math.round(sum)), formattingNumber(Math.round(sum / arr.length))];
+}
+
+let parksReport = (p) => {
+    console.log('---Parks Report---');
+
+    //tree density for each park.
+    (p.forEach((cur) => (cur.treeDensity())));
+
+    //average age for each park.
+    let age = p.map(cur => new Date().getFullYear() - cur.buildYear);
+    let [totalAge, averageAge] = cal(age);
+    console.log(`Our ${p.length} parks the average age of them is ${averageAge} years.`);
+
+
+    //the name of the park that has more than 1000tree
+    let i = p.map(cur => cur.treeNum).findIndex(cur => cur >= 1000);
+    console.log(`The ${p[i].name} has more than ${formattingNumber(1000)} trees.`)
+}
+
+
+let streetsReport = (s) => {
+    console.log('---Streets Report---');
+
+    //total and average length of each street
+    [averageLength, totalLength] = cal(s.map(cur => cur.length));
+    console.log(`The total and average length of our four streets is ${averageLength}km and ${totalLength}km`);
+
+    //classification of each street
+    s.map(cur => cur.streetClassify());
+}
+
+parksReport(parks);
+streetsReport(streets);
